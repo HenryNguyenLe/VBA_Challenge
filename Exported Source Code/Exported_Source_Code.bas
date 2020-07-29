@@ -29,21 +29,22 @@ For Each ws In Worksheets
     'begin to loop thru each row & process data
     For cur_row = 2 To total_row
         ' the object is to group all rows with same ticker symbol together
-        ' to accomplish that, need to determine if ticker is still the same
+        ' to accomplish this, need to determine if ticker is still the same
         ' between the current row and the next row 
         If Cells(cur_row, 1).Value = Cells(cur_row + 1, 1).Value Then
             'if same -> get row value and add ticker count by 1
-            ' add the row value to total stock count value
+            ' add the row value to total stock value
             ticker = Cells(cur_row, 1).Value
             tker_num = tker_num + 1
             total_stk_vol = total_stk_vol + Cells(cur_row + 1, 7).Value
             
         Else
-        'Once there is no more 
-        'Output Coordinate
+            'Once the ticker no longer match -> output that stock to excel table 
+            ' defining output "coordinates"
             Set tbl1 = ActiveSheet.Cells(1, total_column + 2)
           
-        'Calculate the yearly change
+            'Calculate the yearly change
+            'need to plus 1 to move down to first cell below header
             Start_Price = Cells(cur_row - tker_num + 1, 3).Value
             End_Price = Cells(cur_row, 3).Value
             yr_change = End_Price - Start_Price
@@ -53,16 +54,17 @@ For Each ws In Worksheets
                     perc_change = FormatPercent(yr_change / Start_Price, 2)
                 End If
             
-        'Create Table Header
+            'Create Table Header
             With tbl1
                 Dim header(0 To 4) As String
                 Dim i_header As Integer
-                                           
-                    header(0) = "Ticker"
-                    header(1) = "Count"
-                    header(2) = "Yearly Change"
-                    header(3) = "Percent Change"
-                    header(4) = "Total Stock Volume"
+
+                'Create header name for output table                           
+                header(0) = "Ticker"
+                header(1) = "Count"
+                header(2) = "Yearly Change"
+                header(3) = "Percent Change"
+                header(4) = "Total Stock Volume"
                 
                 For i_header = 0 To 4
                     .Offset(0, i_header).Value = header(i_header)
