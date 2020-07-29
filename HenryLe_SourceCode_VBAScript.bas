@@ -185,4 +185,7 @@ For Each ws In Worksheets
 ' After all stocks in this worksheet analyzed, move to the next worksheet
 Next ws
 
+'notify user after all process is done by a message box
+MsgBox "All Spreadsheets have been successfully analyzed!"
+
 End Sub
