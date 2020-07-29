@@ -16,7 +16,7 @@ In this project, the objective is to quickly analyze stock market data of all th
   * Stock Ticker (Symbol) that has the greatest % decrease in that year
   * Stock Ticker (Symbol) that has greatest total volumes
 
-### Quick overview of main steps (pseudo codes):
+### Quick Overview of Main Steps (pseudo codes):
   * Looping through all spreadsheets inside the workbook.
   * In each spreadsheet, looping through every rows, store data and compute gains/ losses of each stock.
   * Outputing both summary tables on the right side of the original data by setting the reference "coordinates" and use `.Offset()` function to create output columns and rows.
@@ -37,3 +37,4 @@ In this project, the objective is to quickly analyze stock market data of all th
 * **Exported Source Code:** because the stock workbook is quite heavy, VBA source codes were exported and saved in this folder for user to download without having to download a fairly large data.
 * **Images:** screenshots of output tables in each year upon script running completion.
 * **Testing File:** during developement and testing, a smaller dataset was used to debug the code more efficiently. The testing dataset was saved in this folder.
+* **Stock_Analysis.xlsm:** this is the main dataset and was successfully ran with source codes developed.
