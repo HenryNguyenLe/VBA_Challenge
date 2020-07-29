@@ -182,8 +182,11 @@ For Each ws In Worksheets
     ' quick format to make sure all data is shown without cutting off due to overflow                
     Columns("I:ZZ").EntireColumn.AutoFit
 
-After all stocks in this worksheet analyzed, move to the next worksheet
+' After all stocks in this worksheet analyzed, move to the next worksheet
 Next ws
+
+'notify user after all process is done by a message box
+MsgBox "All Spreadsheets have been successfully analyzed!"
 
 End Sub
 
