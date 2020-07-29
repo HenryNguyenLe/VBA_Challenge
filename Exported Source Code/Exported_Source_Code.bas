@@ -26,6 +26,7 @@ For Each ws In Worksheets
     total_stk_vol = Range("G2").Value
     tker_num = 1
 
+    '+++++++++++++ FIRST SUMMARY TABLE +++++++++++++++
     'begin to loop thru each row & process data
     For cur_row = 2 To total_row
         ' the object is to group all rows with same ticker symbol together
@@ -65,116 +66,124 @@ For Each ws In Worksheets
                 header(2) = "Yearly Change"
                 header(3) = "Percent Change"
                 header(4) = "Total Stock Volume"
-                
+                'looping to parse header name into row
                 For i_header = 0 To 4
                     .Offset(0, i_header).Value = header(i_header)
                 Next i_header
                 
-         'Table Value
+                'Table Value: passing value from left to right 
                 total_table_cells = Cells(Rows.Count, total_column + 2).End(xlUp).Row
+                'ticker label
                 .Offset(total_table_cells, 0).Value = ticker
+                'total ticker counts
                 .Offset(total_table_cells, 1).Value = tker_num
+                'yearly change
                 .Offset(total_table_cells, 2).Value = yr_change
-                    If yr_change <= 0 Then
-                        .Offset(total_table_cells, 2).Interior.ColorIndex = 3
-                    
-                    Else
-                        .Offset(total_table_cells, 2).Interior.ColorIndex = 4
-                    End If
-                        
+
+                'if statement to change cell color based on value
+                If yr_change <= 0 Then 
+                    'zero or negative results in red background
+                    .Offset(total_table_cells, 2).Interior.ColorIndex = 3
+                Else 
+                    'otherwise, green background
+                    .Offset(total_table_cells, 2).Interior.ColorIndex = 4
+                End If
+
+                ' passing in value of percentage change 
                 .Offset(total_table_cells, 3).Value = perc_change
+                ' format output number to comma seperated thousands
                 .Offset(total_table_cells, 4).Value = Format(total_stk_vol, "#,###")
             End With
             
-        ' reset value after export all the value
+        'reset value after export all the value
+        'get prepare for the next loop for next ticker
         ticker = Range("A2").Offset(tker_num + 1, 0)
         tker_num = 1
         yr_change = 0
         perc_change = 0
         total_stk_vol = 0
-
-
         End If
-
+    'cur_row is not reset as it will be the baseline for the next ticker
+    'if reset, the loop will go back to the previous already analyzed ticker
     Next cur_row
     
     
-' Start building second table for the "CHALLENGES"
+    '+++++++++++++ SECOND SUMMARY TABLE +++++++++++++++
+    ' delare variables
+    Dim tbl2_ColumnNumber As Long
+    Dim tbl2_ColumnLetter As String
+    Dim max_perc_val As Single, min_perc_val As Single
 
-Dim tbl2_ColumnNumber As Long
-Dim tbl2_ColumnLetter As String
-Dim max_perc_val As Single, min_perc_val As Single
 
-
-' count new total column after table 1 created
-   new_total_column = ActiveSheet.UsedRange.Columns.Count
-   perc_change_ColumnNumber = new_total_column - 1
-   perc_change_ColumnLetter = Split(Cells(1, perc_change_ColumnNumber).Address, "$")(1)
-   tabl1_totalrows = Range(perc_change_ColumnLetter & 1, Range(perc_change_ColumnLetter & 2).End(xlDown)).Rows.Count
+    'count new total columns after table 1 created
+    new_total_column = ActiveSheet.UsedRange.Columns.Count
+    'locating coordinates to make table 2
+    'using output table 1 as the reference point
+    perc_change_ColumnNumber = new_total_column - 1
+    perc_change_ColumnLetter = Split(Cells(1, perc_change_ColumnNumber).Address, "$")(1)
+    tabl1_totalrows = Range(perc_change_ColumnLetter & 1, Range(perc_change_ColumnLetter & 2).End(xlDown)).Rows.Count
     
+    'expect to space out 2 columns from table 1
+    tbl2_ColumnNumber = new_total_column + 2
+
+    'convert To Column Letter
+    tbl2_ColumnLetter = Split(Cells(1, tbl2_ColumnNumber).Address, "$")(1)
     
-  tbl2_ColumnNumber = new_total_column + 2
+    ' set table 2 anchor point
+    Set tbl2 = Range(tbl2_ColumnLetter & "1")
 
-'Convert To Column Letter
-  tbl2_ColumnLetter = Split(Cells(1, tbl2_ColumnNumber).Address, "$")(1)
+    ' create the second table row and column headers
+    tbl2.Offset(0, 1) = "Ticker"
+    tbl2.Offset(0, 2) = "Value"
+    tbl2.Offset(1, 0) = "Greatest % Increase"
+    tbl2.Offset(2, 0) = "Greatest % Decrease"
+    tbl2.Offset(3, 0) = "Greatest Total Volume"
+
+
+    ' find the greatest % change value
+    Dim i_find_perc_max As Integer
+
+    ' in order to have compare between different stock
+    ' for the first stock -> need a reference point
+    max_perc_val = -1E+16
+    min_perc_val = 1E+16
+    max_stock_vol = -1E+16
+
+    'looping to find max and min stock 
+    For i_find_perc = 2 To tabl1_totalrows
     
-Set tbl2 = Range(tbl2_ColumnLetter & "1")
-
-    ' create the second table
-tbl2.Offset(0, 1) = "Ticker"
-tbl2.Offset(0, 2) = "Value"
-tbl2.Offset(1, 0) = "Greatest % Increase"
-tbl2.Offset(2, 0) = "Greatest % Decrease"
-tbl2.Offset(3, 0) = "Greatest Total Volume"
-
-
-' find the greatest % change value
-Dim i_find_perc_max As Integer
-
-max_perc_val = -1E+16
-min_perc_val = 1E+16
-max_stock_vol = -1E+16
-
-For i_find_perc = 2 To tabl1_totalrows
-   
-    ' Find max % change
-    If Cells(i_find_perc, new_total_column - 1) > max_perc_val Then
-        max_perc_val = Cells(i_find_perc, new_total_column - 1)
-        max_perc_ticker = Cells(i_find_perc, new_total_column - 4)
-        tbl2.Offset(1, 1) = max_perc_ticker
-        tbl2.Offset(1, 2) = FormatPercent(max_perc_val, 2)
-    End If
-       
-    'Find min % change
-    If Cells(i_find_perc, new_total_column - 1) < min_perc_val Then
-        min_perc_val = Cells(i_find_perc, new_total_column - 1)
-        min_perc_ticker = Cells(i_find_perc, new_total_column - 4)
-        tbl2.Offset(2, 1) = min_perc_ticker
-        tbl2.Offset(2, 2) = FormatPercent(min_perc_val, 2)
-     End If
-     
-     
-'
-'Next i_find_perc
-'
-'
-'For i_find_perc = 2 To tabl1_totalrows
-''Find max stock volume
-    If Cells(i_find_perc, new_total_column) > max_stock_vol Then
-        max_stock_vol = Cells(i_find_perc, new_total_column)
-        max_stock_ticker = Cells(i_find_perc, new_total_column - 4)
-        tbl2.Offset(3, 1) = max_stock_ticker
-        tbl2.Offset(3, 2) = Format(max_stock_vol, "#,###")
-    End If
-
-Next i_find_perc
-
- 
+        ' Find max % change - 1 col to the left of last col on table 1
+        If Cells(i_find_perc, new_total_column - 1) > max_perc_val Then
+            max_perc_val = Cells(i_find_perc, new_total_column - 1)
+            max_perc_ticker = Cells(i_find_perc, new_total_column - 4)
+            tbl2.Offset(1, 1) = max_perc_ticker
+            tbl2.Offset(1, 2) = FormatPercent(max_perc_val, 2)
+        End If
         
-Columns("I:ZZ").EntireColumn.AutoFit
+        'Find min % change
+        If Cells(i_find_perc, new_total_column - 1) < min_perc_val Then
+            min_perc_val = Cells(i_find_perc, new_total_column - 1)
+            min_perc_ticker = Cells(i_find_perc, new_total_column - 4)
+            tbl2.Offset(2, 1) = min_perc_ticker
+            tbl2.Offset(2, 2) = FormatPercent(min_perc_val, 2)
+        End If
+        
+        'Find max stock volume - last column of table 1
+        If Cells(i_find_perc, new_total_column) > max_stock_vol Then
+            max_stock_vol = Cells(i_find_perc, new_total_column)
+            max_stock_ticker = Cells(i_find_perc, new_total_column - 4)
+            tbl2.Offset(3, 1) = max_stock_ticker
+            tbl2.Offset(3, 2) = Format(max_stock_vol, "#,###")
+        End If
+
+    ' next row - next stock
+    Next i_find_perc
+
+    ' quick format to make sure all data is shown without cutting off due to overflow                
+    Columns("I:ZZ").EntireColumn.AutoFit
+
+After all stocks in this worksheet analyzed, move to the next worksheet
 Next ws
-
-
 
 End Sub
 
