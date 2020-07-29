@@ -2,7 +2,6 @@ Attribute VB_Name = "Module1"
 Sub DataCleanup()
 
 'Declare Values
-
 Dim cur_row As Double, last_row As Integer
 Dim cur_col As Integer, last_col As Integer
 Dim total_row As Double, total_colum As Integer
@@ -10,36 +9,38 @@ Dim tker_num As Double    'tker_num is the total data points of the same ticker
 Dim total_table_cells As Double
 Dim ws As Worksheet
 
-
+' Work book contains multiple worksheet
+'  Idea is to loop through each of them and process data
+'  then move on to the next
 For Each ws In Worksheets
     ws.Activate
     
-'Clear any previous data in the output table
-
+    'Clear any previous data in the output table
     Columns("I:ZZ").Delete Shift:=xlToLeft
 
-'Count total rows and columns of raw data
+    'Count total rows and columns of raw data
     total_row = ActiveSheet.UsedRange.Rows.Count
     total_column = ActiveSheet.UsedRange.Columns.Count
     
-'define starting value
+    'define starting value
     total_stk_vol = Range("G2").Value
     tker_num = 1
 
-'begin to loop to find data
-
+    'begin to loop thru each row & process data
     For cur_row = 2 To total_row
-    
-'determine if ticker is still the same
+        ' the object is to group all rows with same ticker symbol together
+        ' to accomplish that, need to determine if ticker is still the same
+        ' between the current row and the next row 
         If Cells(cur_row, 1).Value = Cells(cur_row + 1, 1).Value Then
+            'if same -> get row value and add ticker count by 1
+            ' add the row value to total stock count value
             ticker = Cells(cur_row, 1).Value
             tker_num = tker_num + 1
             total_stk_vol = total_stk_vol + Cells(cur_row + 1, 7).Value
             
         Else
-
+        'Once there is no more 
         'Output Coordinate
-
             Set tbl1 = ActiveSheet.Cells(1, total_column + 2)
           
         'Calculate the yearly change
